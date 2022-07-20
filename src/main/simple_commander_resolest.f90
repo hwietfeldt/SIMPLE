@@ -16,6 +16,7 @@ public :: fsc_commander
 ! public :: nonuniform_filter_commander
 public :: opt_3D_filter_commander
 public :: opt_2D_filter_commander
+public :: opt_2D_filter_test_commander
 private
 #include "simple_local_flags.inc"
 
@@ -38,6 +39,11 @@ type, extends(commander_base) :: opt_2D_filter_commander
   contains
     procedure :: execute      => exec_opt_2D_filter
 end type opt_2D_filter_commander
+
+type, extends(commander_base) :: opt_2D_filter_test_commander
+  contains
+    procedure :: execute      => exec_opt_2D_filter_test
+end type opt_2D_filter_test_commander
 
 type, extends(commander_base) :: opt_3D_filter_commander
   contains
@@ -337,5 +343,50 @@ contains
         ! end gracefully
         call simple_end('**** SIMPLE_OPT_2D_FILTER NORMAL STOP ****')
     end subroutine exec_opt_2D_filter
+    
+    subroutine exec_opt_2D_filter_test( self, cline )
+        use simple_opt_filter, only: opt_2D_filter_sub_test
+        use simple_tvfilter,   only: tvfilter
+        use simple_class_frcs, only: class_frcs
+        class(opt_2D_filter_test_commander), intent(inout) :: self
+        class(cmdline),                 intent(inout) :: cline
+        character(len=:), allocatable :: file_tag
+        type(image),      allocatable :: even(:), odd(:)
+        type(parameters) :: params
+        integer          :: iptcl
+        ! init
+        if( .not. cline%defined('mkdir')      ) call cline%set('mkdir',    'yes')
+        if( .not. cline%defined('smooth_ext') ) call cline%set('smooth_ext', 20.)
+        call params%new(cline) 
+        call find_ldim_nptcls(params%stk, params%ldim, params%nptcls)
+        params%ldim(3) = 1 ! because we operate on stacks
+        if( params%l_nonuniform )then
+            file_tag = 'nonuniform_opt_2D_filter_'//trim(params%filter)//'_ext_'//int2str(params%smooth_ext)
+        else
+            file_tag = 'uniform_opt_2D_filter_'//trim(params%filter)//'_ext_'//int2str(params%smooth_ext)
+        endif
+        ! allocate
+        allocate(odd(params%nptcls), even(params%nptcls))
+        ! construct & read
+        do iptcl = 1, params%nptcls
+            call odd( iptcl)%new(params%ldim, params%smpd, .false.)
+            call even(iptcl)%new(params%ldim, params%smpd, .false.)
+            call odd( iptcl)%read(params%stk2, iptcl)
+            call even(iptcl)%read(params%stk,  iptcl)
+        enddo
+        ! filter
+        call opt_2D_filter_sub_test( even, odd )
+        ! destruct
+        do iptcl = 1, params%nptcls
+            call odd( iptcl)%write(trim(file_tag)//'_odd.mrc',  iptcl)
+            call even(iptcl)%write(trim(file_tag)//'_even.mrc', iptcl)
+            call odd( iptcl)%kill()
+            call even(iptcl)%kill()
+        enddo
+        call cline%set('odd_stk',  trim(file_tag)//'_odd.mrc')
+        call cline%set('even_stk', trim(file_tag)//'_even.mrc')
+        ! end gracefully
+        call simple_end('**** SIMPLE_OPT_2D_FILTER NORMAL STOP ****')
+    end subroutine exec_opt_2D_filter_test
 
 end module simple_commander_resolest
