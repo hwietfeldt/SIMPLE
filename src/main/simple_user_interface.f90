@@ -118,6 +118,7 @@ type(simple_program), target :: new_project
 type(simple_program), target :: opt_2D_filter
 type(simple_program), target :: opt_2D_filter_test
 type(simple_program), target :: opt_3D_filter
+type(simple_program), target :: opt_3D_filter_test
 type(simple_program), target :: normalize_
 type(simple_program), target :: orisops
 type(simple_program), target :: oristats
@@ -369,6 +370,7 @@ contains
         call new_opt_2D_filter
         call new_opt_2D_filter_test
         call new_opt_3D_filter
+        call new_opt_3D_filter_test
         call new_normalize
         call new_orisops
         call new_oristats
@@ -474,6 +476,7 @@ contains
         call push2prg_ptr_array(opt_2D_filter)
         call push2prg_ptr_array(opt_2D_filter_test)
         call push2prg_ptr_array(opt_3D_filter)
+        call push2prg_ptr_array(opt_3D_filter_test)
         call push2prg_ptr_array(normalize_)
         call push2prg_ptr_array(orisops)
         call push2prg_ptr_array(oristats)
@@ -642,6 +645,8 @@ contains
                 ptr2prg => opt_2D_filter_test
             case('opt_3D_filter')
                 ptr2prg => opt_3D_filter
+            case('opt_3D_filter_test')
+                ptr2prg => opt_3D_filter_test
             case('normalize')
                 ptr2prg => normalize_
             case('orisops')
@@ -793,6 +798,7 @@ contains
         write(logfhandle,'(A)') opt_2D_filter%name
         write(logfhandle,'(A)') opt_2D_filter_test%name
         write(logfhandle,'(A)') opt_3D_filter%name
+        write(logfhandle,'(A)') opt_3D_filter_test%name
         write(logfhandle,'(A)') normalize_%name
         write(logfhandle,'(A)') orisops%name
         write(logfhandle,'(A)') oristats%name
@@ -2796,6 +2802,38 @@ contains
         ! computer controls
         call opt_3D_filter%set_input('comp_ctrls', 1, nthr)
     end subroutine new_opt_3D_filter
+
+    subroutine new_opt_3D_filter_test
+        ! PROGRAM SPECIFICATION
+        call opt_3D_filter_test%new(&
+        &'opt_3D_filter_test',&                                      ! name
+        &'Butterworth 3D filter (uniform/nonuniform)',&         ! descr_short
+        &'is a program for 3D uniform/nonuniform filter by minimizing/searching the fourier index of the CV cost function. Test: Using batch fft.',& ! descr_long
+        &'simple_exec',&                                        ! executable
+        &2, 1, 0, 0, 6, 2, 1, .false.)                          ! # entries in each group, requires sp_project
+        ! INPUT PARAMETER SPECIFICATIONS
+        ! image input/output
+        call opt_3D_filter_test%set_input('img_ios', 1, 'vol1', 'file', 'Odd volume',       'Odd volume',       'vol1.mrc file', .true., '')
+        call opt_3D_filter_test%set_input('img_ios', 2, 'vol2', 'file', 'Even volume',      'Even volume',      'vol2.mrc file', .true., '')
+        ! parameter input/output
+        call opt_3D_filter_test%set_input('parm_ios', 1, smpd)
+        ! alternative inputs
+        ! <empty>
+        ! search controls
+        ! <empty>
+        ! filter controls
+        call opt_3D_filter_test%set_input('filt_ctrls', 1, nonuniform)
+        call opt_3D_filter_test%set_input('filt_ctrls', 2, smooth_ext)
+        call opt_3D_filter_test%set_input('filt_ctrls', 3, filter_type)
+        call opt_3D_filter_test%set_input('filt_ctrls', 4, lp_lowres)
+        call opt_3D_filter_test%set_input('filt_ctrls', 5, nsearch)
+        call opt_3D_filter_test%set_input('filt_ctrls', 6, match_filt)
+        ! mask controls
+        call opt_3D_filter_test%set_input('mask_ctrls', 1, mskdiam)
+        call opt_3D_filter_test%set_input('mask_ctrls', 2, mskfile)
+        ! computer controls
+        call opt_3D_filter_test%set_input('comp_ctrls', 1, nthr)
+    end subroutine new_opt_3D_filter_test
 
     subroutine new_new_project
         ! PROGRAM SPECIFICATION
