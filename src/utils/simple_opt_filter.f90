@@ -376,11 +376,11 @@ contains
 
     ! 2D optimization(search)-based uniform/nonuniform filter, serial (strictly non-paralellized) version
     subroutine opt_filter_2D_test(odd, even,&
-                                    &odd_copy_rmat,  odd_copy_cmat,  odd_copy_shellnorm,&
-                                    &even_copy_rmat, even_copy_cmat, even_copy_shellnorm,&
-                                    &tvfilt_in, cur_fil, weights_2D, kstop,&
-                                    &opt_odd, opt_even, weights_img, ref_diff_odd_img, ref_diff_even_img,&
-                                    &fft_vars)
+                                 &odd_copy_rmat,  odd_copy_cmat,  odd_copy_shellnorm,&
+                                 &even_copy_rmat, even_copy_cmat, even_copy_shellnorm,&
+                                 &tvfilt_in, cur_fil, weights_2D, kstop,&
+                                 &opt_odd, opt_even, weights_img, ref_diff_odd_img, ref_diff_even_img,&
+                                 &fft_vars)
         use simple_tvfilter, only: tvfilter
         class(image),   intent(inout) :: odd
         class(image),   intent(inout) :: even
